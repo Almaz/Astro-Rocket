@@ -6,6 +6,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const posts = await getPublishedPosts('en');
   const tags = collectTags(posts);
 
+  if (tags.length === 0) {
+    return [{ params: { tag: 'placeholder' }, props: { tag: 'placeholder', count: 0 } }];
+  }
+
   return tags.map((tag) => {
     const count = posts.filter((p) => p.data.tags.includes(tag)).length;
     return {

@@ -19,7 +19,7 @@ interface Props {
   eagerReveal?: boolean;
 }
 
-const { title, description, image, imageAlt, noindex, nofollow, showScrollProgress = false, eagerReveal = false } = Astro.props;
+const { title, description, image, imageAlt, noindex, nofollow, eagerReveal = false } = Astro.props;
 
 ---
 
@@ -40,7 +40,6 @@ const { title, description, image, imageAlt, noindex, nofollow, showScrollProgre
     size="lg"
     showActiveState
     showCta={false}
-    showScrollProgress={showScrollProgress}
   />
 
   <main class="min-h-screen pt-16">

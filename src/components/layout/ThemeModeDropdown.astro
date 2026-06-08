@@ -13,15 +13,36 @@
  * instances (header pill + mobile-menu pill) and view-transition re-mounts.
  */
 import { cn } from '@/lib/cn';
+import { t, getLocaleFromPath } from '@/i18n';
 
 interface Props {
   class?: string;
 }
 
 const { class: className } = Astro.props;
+
+const locale = getLocaleFromPath(Astro.url.pathname);
+const i18n = {
+  system: t('theme.systemMode', locale),
+  light: t('theme.lightMode', locale),
+  dark: t('theme.darkMode', locale),
+  currentlyLight: t('theme.currentlyLight', locale),
+  currentlyDark: t('theme.currentlyDark', locale),
+  clickToChange: t('theme.clickToChange', locale),
+  colourMode: t('theme.colourMode', locale),
+};
 ---
 
-<div class={cn('relative ttg-wrapper', className)}>
+<div
+  class={cn('relative ttg-wrapper', className)}
+  data-i18n-system={i18n.system}
+  data-i18n-light={i18n.light}
+  data-i18n-dark={i18n.dark}
+  data-i18n-currently-light={i18n.currentlyLight}
+  data-i18n-currently-dark={i18n.currentlyDark}
+  data-i18n-click-to-change={i18n.clickToChange}
+  data-i18n-colour-mode={i18n.colourMode}
+>
   <!-- Trigger pill -->
   <button
     type="button"
@@ -33,7 +54,7 @@ const { class: className } = Astro.props;
     )}
     aria-haspopup="menu"
     aria-expanded="false"
-    aria-label="Theme: system. Click to change."
+    aria-label={`Theme: system. ${i18n.clickToChange}`}
   >
     <!-- Monitor — shown when data-theme-mode="system" (also pre-bootstrap fallback) -->
     <svg class="ttg-icon ttg-icon-system h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -72,7 +93,7 @@ const { class: className } = Astro.props;
       'p-1.5 hidden'
     )}
     role="menu"
-    aria-label="Colour mode"
+    aria-label={i18n.colourMode}
   >
     <button type="button" class="ttg-row" role="menuitemradio" aria-checked="false" data-mode="system">
       <span class="ttg-row-icon">
@@ -82,8 +103,8 @@ const { class: className } = Astro.props;
         </svg>
       </span>
       <span class="ttg-row-label">
-        <span class="ttg-row-title">System</span>
-        <span class="ttg-system-sub">Currently light</span>
+        <span class="ttg-row-title">{i18n.system}</span>
+        <span class="ttg-system-sub">{i18n.currentlyLight}</span>
       </span>
       <svg class="ttg-check h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20 6L9 17l-5-5"/>
@@ -97,7 +118,8 @@ const { class: className } = Astro.props;
         </svg>
       </span>
       <span class="ttg-row-label">
-        <span class="ttg-row-title">Light</span>
+
+        <span class="ttg-row-title">{i18n.light}</span>
       </span>
       <svg class="ttg-check h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20 6L9 17l-5-5"/>
@@ -110,8 +132,7 @@ const { class: className } = Astro.props;
           <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
         </svg>
       </span>
-      <span class="ttg-row-label">
-        <span class="ttg-row-title">Dark</span>
+        <span class="ttg-row-title">{i18n.dark}</span>
       </span>
       <svg class="ttg-check h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M20 6L9 17l-5-5"/>
@@ -232,14 +253,15 @@ const { class: className } = Astro.props;
     });
   }
 
-  function syncAllTriggerLabels(mode: Mode): void {
+  function syncAllTriggerLabels(mode: Mode, i18n: { system: string; light: string; dark: string; clickToChange: string }): void {
+    const modeNames: Record<Mode, string> = { system: i18n.system, light: i18n.light, dark: i18n.dark };
     document.querySelectorAll<HTMLButtonElement>('.ttg-trigger').forEach((btn) => {
-      btn.setAttribute('aria-label', `Theme: ${mode}. Click to change.`);
+      btn.setAttribute('aria-label', `${modeNames[mode]}. ${i18n.clickToChange}`);
     });
   }
 
-  function syncSystemSubLine(): void {
-    const text = osIsDark() ? 'Currently dark' : 'Currently light';
+  function syncSystemSubLine(i18n: { currentlyLight: string; currentlyDark: string }): void {
+    const text = osIsDark() ? i18n.currentlyDark : i18n.currentlyLight;
     document.querySelectorAll<HTMLElement>('.ttg-system-sub').forEach((el) => {
       el.textContent = text;
     });
@@ -266,11 +288,23 @@ const { class: className } = Astro.props;
     const wrappers = document.querySelectorAll<HTMLElement>('.ttg-wrapper');
     if (!wrappers.length) return;
 
+    // Read i18n translations from data attributes (first wrapper)
+    const w = wrappers[0];
+    const i18n = {
+      system: w.dataset.i18nSystem || 'System',
+      light: w.dataset.i18nLight || 'Light',
+      dark: w.dataset.i18nDark || 'Dark',
+      currentlyLight: w.dataset.i18nCurrentlyLight || 'Currently light',
+      currentlyDark: w.dataset.i18nCurrentlyDark || 'Currently dark',
+      clickToChange: w.dataset.i18nClickToChange || 'Click to change',
+      colourMode: w.dataset.i18nColourMode || 'Colour mode',
+    };
+
     // Sync state across all instances on every (re-)init
     const mode = readMode();
     syncAllRows(mode);
-    syncAllTriggerLabels(mode);
-    syncSystemSubLine();
+    syncAllTriggerLabels(mode, i18n);
+    syncSystemSubLine(i18n);
 
     wrappers.forEach((wrapper) => {
       if (wrapper.dataset.ttgInit) return;
@@ -301,7 +335,7 @@ const { class: className } = Astro.props;
           try { localStorage.setItem(STORAGE_KEY, next); } catch { /* private mode */ }
           applyMode(next);
           syncAllRows(next);
-          syncAllTriggerLabels(next);
+          syncAllTriggerLabels(next, i18n);
           closeAllModePanels();
         });
       });
@@ -325,9 +359,9 @@ const { class: className } = Astro.props;
       // Live-update the "Currently dark/light" sub-line when the OS flips.
       // Bootstrap already toggles .dark for 'system' mode — we just refresh text.
       const mql = window.matchMedia('(prefers-color-scheme: dark)');
-      const onSchemeChange = () => syncSystemSubLine();
+      const onSchemeChange = () => syncSystemSubLine(i18n);
       if (mql.addEventListener) mql.addEventListener('change', onSchemeChange);
-      else if (mql.addListener) mql.addListener(onSchemeChange);
+      else if (mql.addEventListener) mql.addEventListener('change', onSchemeChange);
     }
   }
 

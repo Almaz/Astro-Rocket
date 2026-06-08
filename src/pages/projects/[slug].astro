@@ -7,7 +7,13 @@ export async function getStaticPaths() {
     return import.meta.env.PROD ? data.draft !== true : true;
   });
 
-  const routableProjects = visibleProjects.filter((p) => !p.data.placeholder);
+  const routableProjects = visibleProjects
+    .filter((p) => !p.data.placeholder)
+    .filter((p) => {
+      const slug = p.id.replace(/\.mdx?$/, '');
+      // Skip paths that start with "ru/" — they are handled by ru/projects/[slug].astro
+      return !slug.startsWith('ru/');
+    });
 
   return routableProjects.map((project) => ({
     params: { slug: project.id.replace(/\.mdx?$/, '') },

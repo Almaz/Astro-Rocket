@@ -18,7 +18,7 @@ const blog = defineCollection({
       svgSlug: z.string().optional(),
       draft: z.boolean().default(false),
       featured: z.boolean().default(false),
-      locale: z.enum(['en', 'es', 'fr']).default('en'),
+      locale: z.enum(['en', 'es', 'fr', 'ru']).default('en'),
       /** Optional FAQs — when set, emit FAQ JSON-LD alongside the BlogPosting schema. */
       faqs: z
         .array(
@@ -42,7 +42,7 @@ const pages = defineCollection({
     title: z.string(),
     description: z.string(),
     updatedAt: z.coerce.date().optional(),
-    locale: z.enum(['en', 'es', 'fr']).default('en'),
+    locale: z.enum(['en', 'es', 'fr', 'ru']).default('en'),
   }),
 });
 
@@ -72,7 +72,7 @@ const faqs = defineCollection({
     answer: z.string(),
     category: z.string().optional(),
     order: z.number().default(0),
-    locale: z.enum(['en', 'es', 'fr']).default('en'),
+    locale: z.enum(['en', 'es', 'fr', 'ru']).default('en'),
   }),
 });
 
@@ -83,8 +83,8 @@ const projects = defineCollection({
     z.object({
       title: z.string(),
       description: z.string(),
-      url: z.string().url().optional(),
-      repo: z.string().url().optional(),
+      url: z.string().optional(),
+      repo: z.string().optional(),
       image: image().optional(),
       imageAlt: z.string().optional(),
       /** Optional gallery — when provided, renders a swipeable carousel in the hero in place of the single `image`. */
@@ -109,6 +109,7 @@ const projects = defineCollection({
       placeholder: z.boolean().default(false),
       /** Per-project override: hide table of contents on this project */
       toc: z.boolean().optional(),
+      locale: z.enum(['en', 'es', 'fr', 'ru']).default('en'),
     }),
 });
 
@@ -119,7 +120,7 @@ const stack = defineCollection({
     name: z.string(),
     description: z.string(),
     version: z.string(),
-    url: z.string().url(),
+    url: z.string(),
     icon: z.string(), // icon name, e.g. 'brand-astro'
     colorOklch: z.string(), // OKLCH params, e.g. '62.5% 0.22 38'
     order: z.number().default(0),

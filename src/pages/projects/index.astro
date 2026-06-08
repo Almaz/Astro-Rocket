@@ -12,7 +12,7 @@ import { Hero } from '@/components/hero';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { getCollection } from 'astro:content';
 
-const items = await getCollection('projects', ({ data }) => !data.draft);
+const items = await getCollection('projects', ({ data }) => data.locale === 'en' && !data.draft);
 const projects = items.sort((a, b) => a.data.order - b.data.order);
 ---
 
@@ -102,7 +102,7 @@ const projects = items.sort((a, b) => a.data.order - b.data.order);
     </div>
 
     <!-- Desktop: contained LetterGlitch band with glass card -->
-    <LetterGlitchBand>
+    <LetterGlitchBand locale="en">
       <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
         Want something like this?
       </h2>

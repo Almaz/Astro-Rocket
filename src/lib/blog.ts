@@ -18,12 +18,21 @@ export const TAG_POSTS_PER_PAGE = 12;
  * (e.g. "web-performance"). Two-way deterministic — pair with `findTagBySlug`.
  */
 export function tagToSlug(tag: string): string {
-  return tag
+  // Convert to lowercase, transliterate common scripts, keep valid URL chars
+  let slug = tag
     .toLowerCase()
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/[^a-z0-9\u0400-\u04ff]+/g, '-')  // keep Cyrillic too
     .replace(/^-+|-+$/g, '');
+
+  // Fallback if slug is empty (e.g. tag consisted entirely of stripped chars)
+  if (!slug) {
+    // URL-encode the original tag as a last resort
+    slug = encodeURIComponent(tag.toLowerCase()).replace(/%/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  return slug;
 }
 
 /** Find the original tag string given its slug, from a list of known tags. */
@@ -39,9 +48,22 @@ export function getPostSlug(postId: string, locale = 'en'): string {
   return postId.replace(new RegExp(`^${locale}/`), '');
 }
 
-/** URL path for an individual blog post. */
+/** URL path for an individual blog post. Supports locale-prefixed paths. */
 export function getPostUrl(postId: string, locale = 'en'): string {
-  return `/blog/${getPostSlug(postId, locale)}`;
+  const slug = getPostSlug(postId, locale);
+  if (locale === 'en') {
+    return `/blog/${slug}`;
+  }
+  return `/${locale}/blog/${slug}`;
+}
+
+/** URL path for a blog tag archive. Supports locale-prefixed paths. */
+export function getTagUrl(tag: string, locale = 'en'): string {
+  const slug = tagToSlug(tag);
+  if (locale === 'en') {
+    return `/blog/tag/${slug}`;
+  }
+  return `/${locale}/blog/tag/${slug}`;
 }
 
 /**
@@ -59,7 +81,11 @@ export async function getPublishedPosts(
 
 /** All unique tags across the given posts, alphabetically sorted. */
 export function collectTags(posts: CollectionEntry<'blog'>[]): string[] {
-  return [...new Set(posts.flatMap((p) => p.data.tags))].sort();
+  const allTags = posts.flatMap((p) => {
+    const tags = Array.isArray(p.data.tags) ? p.data.tags : [];
+    return tags.filter((t): t is string => typeof t === 'string');
+  });
+  return [...new Set(allTags)].sort();
 }
 
 /** Tag occurrence counts across the given posts, sorted by count desc then alpha. */
@@ -68,8 +94,13 @@ export function collectTagsWithCounts(
 ): { tag: string; count: number }[] {
   const counts = new Map<string, number>();
   for (const p of posts) {
-    for (const t of p.data.tags) {
-      counts.set(t, (counts.get(t) ?? 0) + 1);
+    // Safely handle tags: only iterate if it's an array, and only process string tags
+    const tags = Array.isArray(p.data.tags) ? p.data.tags : [];
+    for (const t of tags) {
+      // Only count string tags
+      if (typeof t === 'string') {
+        counts.set(t, (counts.get(t) ?? 0) + 1);
+      }
     }
   }
   return [...counts.entries()]

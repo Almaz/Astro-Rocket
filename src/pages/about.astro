@@ -253,7 +253,7 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
                 <Icon name="chevron-down" size="sm" class="faq-icon shrink-0 text-foreground-muted transition-transform duration-200" />
               </summary>
               <div class="pb-4 text-sm text-foreground-muted leading-relaxed">
-                Yes. I built <a href="https://astro.build/themes/details/astro-rocket/" target="_blank" rel="noopener noreferrer" class="underline underline-offset-2 decoration-brand-500 hover:text-brand-400 transition-colors">Astro Rocket</a> — a free, production-ready theme listed on the official Astro themes directory. It includes a full component library, blog support, dark mode, SEO, and everything you need to launch a fast modern website without starting from scratch.
+                Yes. I built <a href="https://astro.build/themes/details/astro-rocket/"  class="underline underline-offset-2 decoration-brand-500 hover:text-brand-400 transition-colors">Astro Rocket</a> — a free, production-ready theme listed on the official Astro themes directory. It includes a full component library, blog support, dark mode, SEO, and everything you need to launch a fast modern website without starting from scratch.
               </div>
             </details>
             <details class="border-b border-border last:border-0" name="faq-astro">
@@ -341,7 +341,7 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
           <p class="text-lg text-foreground-muted leading-relaxed text-pretty sm:max-w-xl sm:mx-auto glitch:max-w-none glitch:mx-0">
             You've seen the work, the process, and the tools. If you'd like to know the person behind them, I've put the whole story in one place.
           </p>
-          <Button variant="outline" size="lg" href="https://hansmartens.dev/blog/hans-martens-web-designer-veghel" target="_blank" rel="noopener noreferrer" class="self-start sm:self-center glitch:self-start mt-2 sm:hidden glitch:inline-flex">
+          <Button variant="outline" size="lg" href="/blog/hans-martens-web-designer-veghel" class="self-start sm:self-center glitch:self-start mt-2 sm:hidden glitch:inline-flex">
             Read the full story
             <Icon name="arrow-right" size="sm" />
           </Button>
@@ -350,11 +350,11 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
         <!-- Image -->
         <div class="mx-auto w-full max-w-sm sm:max-w-md glitch:mx-0 glitch:max-w-none" data-reveal="left" data-reveal-delay="1" data-reveal-ease="smooth">
           <a
-            href="https://hansmartens.dev/blog/hans-martens-web-designer-veghel"
+            href="/blog/hans-martens-web-designer-veghel"
             target="_blank"
             rel="noopener noreferrer"
             class="group block overflow-hidden rounded-2xl border border-brand-500/20 bg-brand-500/5 shadow-md ring-1 ring-border/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-brand-500/40"
-            aria-label="Read the introduction post"
+            aria-label="Read the full story"
           >
             <div class="transition-transform duration-300 group-hover:scale-105">
               <BlogImageSVG slug="hi-im-hans-martens" title="Hi, I'm Hans Martens — the longer story" />
@@ -362,7 +362,7 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
           </a>
         </div>
         <div class="hidden sm:flex justify-center glitch:hidden" data-reveal data-reveal-delay="2">
-          <Button size="lg" variant="outline" href="https://hansmartens.dev/blog/hans-martens-web-designer-veghel" target="_blank" rel="noopener noreferrer">
+          <Button size="lg" variant="outline" href="/blog/hans-martens-web-designer-veghel" >
             Read the full story
             <Icon name="arrow-right" size="sm" />
           </Button>
@@ -389,7 +389,7 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
     </div>
 
     <!-- Desktop: contained LetterGlitch band with glass card -->
-    <LetterGlitchBand>
+    <LetterGlitchBand locale="en">
       <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
         Sound like a good fit?
       </h2>

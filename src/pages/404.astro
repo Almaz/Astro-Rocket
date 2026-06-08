@@ -1,6 +1,6 @@
 ---
 /**
- * 404 page
+ * 404 page — supports both English and Russian based on URL
  */
 import PageLayout from '@/layouts/PageLayout.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
@@ -8,67 +8,83 @@ import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Card from '@/components/ui/data-display/Card/Card.astro';
 import Button from '@/components/ui/form/Button/Button.astro';
 import { Hero } from '@/components/hero';
+import { getLocaleFromPath, localizedPath, t } from '@/i18n';
+
+const url = Astro.url;
+const locale = getLocaleFromPath(url.pathname);
+
+const badgeText = t('errors.404.badge', locale);
+const headingPart = t('errors.404.titlePart', locale);
+const headingHighlight = t('errors.404.titleHighlight', locale);
+const description = t('errors.404.description', locale);
+const recoveryTitle = t('errors.404.recoveryTitle', locale);
+
+const homeLabel = t('errors.404.buttons.home', locale);
+const blogLabel = t('errors.404.buttons.blog', locale);
 
 const recoveryLinks = [
   {
     icon: 'layers',
-    title: 'Projects',
-    description: 'Selected work and case studies.',
-    href: '/projects',
+    title: t('errors.404.links.projects.title', locale),
+    description: t('errors.404.links.projects.description', locale),
+    href: localizedPath('/projects', locale),
   },
   {
     icon: 'book',
-    title: 'Blog',
-    description: 'Notes on design, code, and the craft.',
-    href: '/blog',
+    title: t('errors.404.links.blog.title', locale),
+    description: t('errors.404.links.blog.description', locale),
+    href: localizedPath('/blog', locale),
   },
   {
     icon: 'mail',
-    title: 'Contact',
-    description: 'Start a conversation about your project.',
-    href: '/contact',
+    title: t('errors.404.links.contact.title', locale),
+    description: t('errors.404.links.contact.description', locale),
+    href: localizedPath('/contact', locale),
   },
 ];
+
+const homeHref = localizedPath('/', locale);
+const blogHref = localizedPath('/blog', locale);
 ---
 
 <PageLayout
-  title="Page not found — Astro Rocket"
-  description="This page has moved, been removed, or never existed in the first place."
+  title={t('errors.pageNotFound', locale) + ' — ' + t('siteName', locale)}
+  description={t('errors.pageNotFoundMessage', locale)}
   noindex
   eagerReveal
 >
-  <Hero layout="centered" size="sm">
+  <Hero layout="centered" size="sm" data-reveal>
     <Badge slot="badge" variant="brand" pill>
       <Icon name="compass" size="sm" />
-      404 — page not found
+      {badgeText}
     </Badge>
 
     <h1 slot="title">
-      Page not <span class="text-brand-500">found.</span>
+      {headingPart} <span class="text-brand-500">{headingHighlight}</span>
     </h1>
 
     <p slot="description">
-      This page has moved, been removed, or never existed in the first place. Let's get you back on track.
+      {description}
     </p>
 
     <div slot="actions" class="flex flex-col sm:flex-row items-center justify-center gap-4">
-      <Button href="/" size="lg">
+      <Button href={homeHref} size="lg">
         <Icon name="arrow-left" size="sm" />
-        Back to home
+        {homeLabel}
       </Button>
-      <Button href="/blog" variant="outline" size="lg">
-        Browse the blog
+      <Button href={blogHref} variant="outline" size="lg">
+        {blogLabel}
         <Icon name="arrow-right" size="sm" />
       </Button>
     </div>
   </Hero>
 
-  <!-- Recovery Section -->
+  {/* Recovery Section */}
   <section class="py-[var(--space-section-md)] bg-background-secondary border-t border-border">
     <div class="mx-auto max-w-6xl px-6">
       <div class="mb-8 text-center" data-reveal>
         <h2 class="font-display text-3xl md:text-4xl font-bold text-foreground">
-          Try one of these instead
+          {recoveryTitle}
         </h2>
       </div>
 

@@ -30,6 +30,10 @@ interface Props {
   includeProfessionalServiceSchema?: boolean;
   extraSchemas?: WithContext<Thing>[];
   eagerReveal?: boolean;
+  /** When true, the scroll-progress bar sits at the very top of the viewport
+   *  (above the header). When false (default), it sits below the header
+   *  (top-[64px]), matching the bar-shaped header layout. */
+  scrollProgressAtTop?: boolean;
 }
 
 const {
@@ -45,6 +49,7 @@ const {
   includeProfessionalServiceSchema = false,
   extraSchemas = [],
   eagerReveal = false,
+  scrollProgressAtTop = false,
 } = Astro.props;
 
 // Build JSON-LD schemas
@@ -64,11 +69,10 @@ const locale = getLocaleFromPath(Astro.url.pathname);
 ---
 
 <!doctype html>
-<html lang={locale} class="scroll-smooth dark" data-theme="blue" data-theme-mode="system">
+<html lang={locale} data-pagefind-filter={`lang:${locale}`} class="scroll-smooth dark" data-theme="blue" data-theme-mode="system">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="generator" content={Astro.generator} />
 
     <!-- Preload display + body fonts so they're ready for first paint -->
     <link rel="preload" as="font" type="font/woff2" href={manropeFont} crossorigin="anonymous" />
@@ -209,7 +213,7 @@ const locale = getLocaleFromPath(Astro.url.pathname);
             if (getMode() === 'system') applyMode(document.documentElement);
           };
           if (mql.addEventListener) mql.addEventListener('change', onSchemeChange);
-          else if (mql.addListener) mql.addListener(onSchemeChange); // Safari < 14
+          else if (mql.addEventListener) mql.addEventListener('change', onSchemeChange); // Safari < 14
 
           // Re-apply across Astro view transitions (no flash on swap).
           document.addEventListener('astro:before-swap', function (e) {
@@ -231,6 +235,66 @@ const locale = getLocaleFromPath(Astro.url.pathname);
     >
       Skip to content
     </a>
+
+<!-- Scroll progress bar -->
+<div
+  id="scroll-progress-bar-container"
+  class={"fixed left-0 z-[60] h-[2px] w-full overflow-hidden bg-transparent " + (scrollProgressAtTop ? "top-0" : "top-16")}
+  aria-hidden="true"
+>
+  <div
+    id="scroll-progress-bar"
+    class="h-full w-0 bg-brand-500 transition-none"
+  />
+</div>
+
+<script>
+  // Scroll-progress bar: standalone driver.
+  // Lives in BaseLayout so it is guaranteed to be present on every page
+  // regardless of which layout or header variant is used.
+  (function () {
+    const bar = document.getElementById('scroll-progress-bar')!;
+    if (!bar) return;
+
+    let docMaxScrollY = 0;
+    let ticking = false;
+
+    function updateMaxScrollY() {
+      docMaxScrollY = document.documentElement.scrollHeight - window.innerHeight;
+    }
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        const pct = docMaxScrollY > 0 ? (window.scrollY / docMaxScrollY) * 100 : 0;
+        bar.style.width = pct + '%';
+        ticking = false;
+      });
+    }
+
+    function init() {
+      updateMaxScrollY();
+      onScroll();
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateMaxScrollY, { passive: true });
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(updateMaxScrollY).observe(document.documentElement);
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+    // Re-init after Astro SPA navigations
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:after-swap', init);
+  })();
+</script>
 
     <slot name="header" />
 
