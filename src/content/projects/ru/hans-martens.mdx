@@ -10,25 +10,12 @@ year: 2026
 role: "Designer & Developer"
 services: ["Web Design", "Web Development", "Performance"]
 meta: ["Personal site", "Built on Astro Rocket", "Astro 6", "Lighthouse 4×100"]
-image: "../../../assets/projects/hansmartensdev-website.jpg"
+image: "../../../assets/projects/hans-martens-dev-astro-rocket.jpg"
 imageAlt: "Hans Martens Dev website"
-gallery:
-  - src: "../../../assets/projects/hansmartensdev-website.jpg"
-    alt: "Hans Martens Dev — website."
-  - src: "../../../assets/projects/hansmartensdev-a.jpg"
-    alt: "Hans Martens Dev — website."
-  - src: "../../../assets/projects/hansmartensdev-b.jpg"
-    alt: "Hans Martens Dev — website."
-  - src: "../../../assets/projects/hansmartensdev-c.jpg"
-    alt: "Hans Martens Dev — website."
-  - src: "../../../assets/projects/hansmartensdev-d.jpg"
-    alt: "Hans Martens Dev — website."
 ---
 
 import LighthouseScoresGrid from '@/components/landing/LighthouseScoresGrid.astro';
 import Callout from '@/components/patterns/Callout.astro';
-import { Image } from 'astro:assets';
-import letterGlitchScreenshot from '../../../assets/projects/hansmartens-project.jpeg';
 
 ## A site that's mine, not a template
 
@@ -60,13 +47,6 @@ This site scores **100 on every Lighthouse category — on both desktop and mobi
 
 The homepage hero is built around a single vertical gradient — brand-indigo at the top, fading to pure black at the bottom — and it renders **identically in light and dark mode**. The hero is the moment the brand has to land, and locking it to a fixed brand-to-black ramp means the headline reads with the same drama regardless of which mode the visitor's OS prefers. The headline sits in a slightly dimmed, brand-tinted near-white so it never competes with the gradient, and the floating header rests on top as a frosted capsule. Every inner page — blog, projects, about, contact — drops the decoration entirely and lets the content speak.
 
-## The desktop CTA you keep scrolling back to
-
-<Image src={letterGlitchScreenshot} alt="The homepage LetterGlitch CTA: brand-indigo letters cycling on a near-black canvas behind a tinted glass card with the headline 'Have a project in mind?' and two action buttons." widths={[640, 960, 1280]} sizes="(max-width: 768px) 100vw, 800px" />
-
-The closing call-to-action on the homepage, about page, projects index, and every blog post finishes with the same composition: a contained band with the **LetterGlitch** canvas cycling brand-indigo letters behind a near-opaque glass card. It's deliberately desktop-only — on mobile the band would compress badly, so phones get a quieter brand-tinted glass card instead. The full build is written up in [Add a LetterGlitch effect to your Astro 6 site](/blog/letter-glitch-astro-6).
-
-## Small details that compound
 
 - **The cursor leaves a trail.** A brand-indigo dot sits exactly under the pointer, a lagging ring chases it with elastic ease and blooms over anything clickable, and a comet of fading particles spawns behind every flick of the mouse. Desktop and fine-pointer only — the moment a visitor sets `prefers-reduced-motion`, the whole layer vanishes without a trace.
 
