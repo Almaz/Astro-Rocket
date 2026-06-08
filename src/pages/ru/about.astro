@@ -12,7 +12,6 @@ import { Hero } from '@/components/hero';
 import TypingEffect from '@/components/ui/TypingEffect.astro';
 import TechStack from '@/components/landing/TechStack.astro';
 import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
-import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
 ---
 <PageLayout
   title="Обо мне — Веб-дизайнер и Разработчик"
@@ -356,8 +355,8 @@ import BlogImageSVG from '@/components/blog/BlogImageSVG.astro';
             class="group block overflow-hidden rounded-2xl border border-brand-500/20 bg-brand-500/5 shadow-md ring-1 ring-border/60 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:border-brand-500/40"
             aria-label="Перейти к блогу"
           >
-            <div class="transition-transform duration-300 group-hover:scale-105">
-              <BlogImageSVG slug="hi-im-hans-martens" title="Привет, я Ханс Мартенс — более длинная история" />
+            <div class="flex items-center justify-center h-48 sm:h-64 bg-gradient-to-br from-brand-500/10 to-brand-500/5 transition-transform duration-300 group-hover:scale-105">
+              <Icon name="user" size="lg" class="text-brand-500/40" />
             </div>
           </a>
         </div>
