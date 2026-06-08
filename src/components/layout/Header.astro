@@ -31,12 +31,15 @@ import Logo from '@/components/ui/marketing/Logo/Logo.astro';
 import ThemeModeDropdown from '@/components/layout/ThemeModeDropdown.astro';
 import ThemeSelector from '@/components/layout/ThemeSelector.astro';
 import ThemeSelectorDropdown from '@/components/layout/ThemeSelectorDropdown.astro';
-import LanguageSwitcher from '@/components/layout/LanguageSwitcher.astro';
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher.astro";
+import PagefindSearch from "@/components/patterns/PagefindSearch.astro";
 import siteConfig from '@/config/site.config';
 import { isEnabled as i18nIsEnabled } from '@/i18n';
+import { t, getLocaleFromPath, localizedPath } from '@/i18n';
 
 export interface NavItem {
   label: string;
+  labelKey?: string;
   href: string;
 }
 
@@ -68,8 +71,6 @@ interface Props extends HTMLAttributes<'header'> {
   hideLogo?: boolean;
   showLanguageSwitcher?: boolean;
   showSocialLinks?: boolean;
-  showScrollProgress?: boolean;
-  scrollProgressPosition?: 'top' | 'bottom';
   autoHide?: boolean;
   invertOnReturn?: boolean;
   /**
@@ -97,8 +98,6 @@ const {
   showSocialLinks = false,
   showLanguageSwitcher = i18nIsEnabled(),
   showActiveState = true,
-  showScrollProgress = false,
-  scrollProgressPosition = 'bottom',
   autoHide = true,
   invertOnReturn = true,
   logoText,
@@ -116,16 +115,17 @@ const maxWidthClass = {
   '7xl': 'max-w-7xl',
   full: 'max-w-full',
 }[maxWidth];
-const effectiveShowScrollProgress = showScrollProgress || (isFloating && !autoHide);
 const isInvert = colorScheme === 'invert';
 
 const defaultNav = getNavItems().map((item: NavConfigItem) => ({
   label: item.label,
+  labelKey: item.labelKey,
   href: item.href,
 }));
 const navItems: NavItem[] = nav || [...extraNav, ...defaultNav];
 
 const currentPath = Astro.url.pathname;
+const locale = getLocaleFromPath(Astro.url.pathname);
 const isLandingPage = currentPath === '/';
 const ctaHref = cta.href?.startsWith('#') && !isLandingPage ? `/${cta.href}` : cta.href;
 
@@ -148,14 +148,14 @@ function isActive(href: string): boolean {
   return currentPath === href || currentPath.startsWith(href + '/');
 }
 
-function getSocialIconData(url: string): { icon: string; label: string } {
-  if (url.includes('github.com'))    return { icon: 'github',    label: 'GitHub' };
-  if (url.includes('instagram.com')) return { icon: 'instagram', label: 'Instagram' };
-  if (url.includes('x.com') || url.includes('twitter.com')) return { icon: 'x-twitter', label: 'X' };
-  if (url.includes('linkedin.com'))  return { icon: 'linkedin',  label: 'LinkedIn' };
-  if (url.includes('bsky.app'))      return { icon: 'bluesky',   label: 'Bluesky' };
-  if (url.includes('youtube.com'))   return { icon: 'youtube',   label: 'YouTube' };
-  return { icon: 'link', label: 'Social' };
+function getSocialIconData(url: string): { icon: string; labelKey: string } {
+  if (url.includes('github.com'))    return { icon: 'github',    labelKey: 'nav.social.github' };
+  if (url.includes('instagram.com')) return { icon: 'instagram', labelKey: 'nav.social.instagram' };
+  if (url.includes('x.com') || url.includes('twitter.com')) return { icon: 'x-twitter', labelKey: 'nav.social.twitter' };
+  if (url.includes('linkedin.com'))  return { icon: 'linkedin',  labelKey: 'nav.social.linkedin' };
+  if (url.includes('bsky.app'))      return { icon: 'bluesky',   labelKey: 'nav.social.bluesky' };
+  if (url.includes('youtube.com'))   return { icon: 'youtube',   labelKey: 'nav.social.youtube' };
+  return { icon: 'link', labelKey: 'nav.social.github' };
 }
 
 function getNavIcon(href: string): string {
@@ -188,6 +188,9 @@ const buttonId = `${menuId}-button`;
   data-header-color-scheme={colorScheme}
   data-header-auto-hide={autoHide ? 'true' : 'false'}
   data-header-invert-on-return={invertOnReturn ? 'true' : 'false'}
+  data-locale={locale}
+  data-i18n-navigate={t('nav.navigate', locale)}
+  data-i18n-theme={t('nav.theme', locale)}
   {...attrs}
 >
   <div class={cn(innerClasses, 'hdr-inner')}>
@@ -196,7 +199,7 @@ const buttonId = `${menuId}-button`;
         (hasLogoSlot ? (
           <slot name="logo" />
         ) : (
-          <a href="/" class="flex items-center gap-2">
+          <a href={localizedPath('/', locale)} class="flex items-center gap-2">
             <Logo size={size === 'sm' ? 'md' : 'lg'} forceDark={isInvert} class="bg-brand-600" />
             <span
               class={cn(
@@ -204,7 +207,7 @@ const buttonId = `${menuId}-button`;
                 isFloating ? 'hdr-logo-text' : (isInvert ? 'text-brand-600 dark:text-foreground lg:text-on-invert' : 'text-brand-600 dark:text-foreground')
               )}
             >
-              {logoText || siteConfig.name}
+              {logoText || t('siteName', locale)}
             </span>
           </a>
         ))
@@ -213,14 +216,14 @@ const buttonId = `${menuId}-button`;
     {
       layout !== 'minimal' &&
         (hasNavSlot ? (
-          <nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
+          <nav class="hidden items-center gap-1 lg:flex" aria-label={t('nav.mainNavigation', locale)}>
             <slot name="nav" />
           </nav>
         ) : (
-          <nav class="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
-            {navItems.map(({ label, href }) => (
+          <nav class="hidden items-center gap-1 lg:flex" aria-label={t('nav.mainNavigation', locale)}>
+            {navItems.map(({ label, labelKey, href }) => (
               <a
-                href={href.startsWith('#') && !isLandingPage ? `/${href}` : href}
+                href={localizedPath(href.startsWith('#') && !isLandingPage ? `/${href}` : href, locale)}
                 class={cn(
                   'nav-link relative rounded-md px-3 py-2 text-sm',
                   'transition-all duration-(--transition-fast)',
@@ -235,7 +238,7 @@ const buttonId = `${menuId}-button`;
                 )}
                 aria-current={isActive(href) ? 'page' : undefined}
               >
-                {label}
+                {t(labelKey ?? label, locale)}
               </a>
             ))}
           </nav>
@@ -248,6 +251,10 @@ const buttonId = `${menuId}-button`;
           <slot name="actions" />
         ) : (
           <>
+            <div class="flex">
+              <PagefindSearch />
+            </div>
+
             {showThemeToggle && (
               <div class="flex">
                 <ThemeModeDropdown class={isFloating ? 'hdr-invert-text' : undefined} />
@@ -269,13 +276,13 @@ const buttonId = `${menuId}-button`;
             {showSocialLinks && siteConfig.socialLinks.length > 0 && (
               <div class="hidden lg:flex items-center gap-0.5">
                 {siteConfig.socialLinks.map((url) => {
-                  const { icon, label } = getSocialIconData(url);
+                  const { icon, labelKey } = getSocialIconData(url);
                   return (
                     <a
                       href={url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label={label}
+                      aria-label={t(labelKey, locale)}
                       class={cn(
                         'rounded-md p-2 transition-colors duration-(--transition-fast)',
                         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
@@ -315,7 +322,7 @@ const buttonId = `${menuId}-button`;
                   class={cn('hdr-cta-brand', isFloating ? 'hdr-invert-cta' : undefined)}
                 >
                   {cta.icon && <Icon name={cta.icon} size="sm" />}
-                  {cta.label}
+                  {t(cta.label || 'nav.startProject', locale)}
                   {cta.trailingIcon && <Icon name={cta.trailingIcon} size="sm" />}
                 </Button>
               </div>
@@ -338,7 +345,8 @@ const buttonId = `${menuId}-button`;
             )}
             aria-expanded="false"
             aria-controls={menuId}
-            aria-label="Toggle menu"
+
+            aria-label={t('nav.openMenu', locale)}
           >
             <span class="menu-icon">
               <Icon name="menu" size="md" />
@@ -351,26 +359,6 @@ const buttonId = `${menuId}-button`;
       }
     </div>
   </div>
-
-  {effectiveShowScrollProgress && (
-    isFloating ? (
-      <div
-        class={`absolute inset-x-3 h-[2px] overflow-hidden rounded-full ${scrollProgressPosition === 'top' ? 'top-[2px]' : 'bottom-[2px]'}`}
-        aria-hidden="true"
-      >
-        <div
-          id="scroll-progress-bar"
-          class="absolute left-0 top-0 h-full w-0 bg-brand-500 transition-none"
-        />
-      </div>
-    ) : (
-      <div
-        id="scroll-progress-bar"
-        class={`absolute left-0 h-[2px] w-0 bg-brand-500 transition-none ${scrollProgressPosition === 'top' ? 'top-0' : 'bottom-0'}`}
-        aria-hidden="true"
-      />
-    )
-  )}
 
   {
     showMobileMenu &&
@@ -385,7 +373,7 @@ const buttonId = `${menuId}-button`;
               : 'border-border bg-background border-t'
           )}
           role="navigation"
-          aria-label="Mobile navigation"
+          aria-label={t('nav.mobileNavigation', locale)}
         >
           <slot name="mobile-menu" />
         </div>
@@ -399,18 +387,19 @@ const buttonId = `${menuId}-button`;
               : 'border-border bg-background border-t'
           )}
           role="navigation"
-          aria-label="Mobile navigation"
+          aria-label={t('nav.mobileNavigation', locale)}
         >
           <div class={cn(
             'mobile-menu-body py-3',
             isFloating ? 'px-3' : cn('mx-auto px-4', maxWidthClass)
           )}>
             <section class="mobile-menu-section">
-              <p class="mobile-menu-label">Navigate</p>
+
+              <p class="mobile-menu-label">{t('nav.navigate', locale)}</p>
               <ul class="space-y-0.5">
-                {navItems.map(({ label, href }, idx) => {
+                {navItems.map(({ label, labelKey, href }, idx) => {
                   const active = isActive(href);
-                  const resolvedHref = href.startsWith('#') && !isLandingPage ? `/${href}` : href;
+                  const resolvedHref = localizedPath(href.startsWith('#') && !isLandingPage ? `/${href}` : href, locale);
                   return (
                     <li>
                       <a
@@ -427,7 +416,7 @@ const buttonId = `${menuId}-button`;
                         <span class="mobile-menu-tile">
                           <Icon name={getNavIcon(href)} size="sm" />
                         </span>
-                        <span class="flex-1">{label}</span>
+                        <span class="flex-1">{t(labelKey ?? label, locale)}</span>
                         <Icon name="chevron-right" size="sm" class="mobile-menu-chevron" />
                       </a>
                     </li>
@@ -438,12 +427,13 @@ const buttonId = `${menuId}-button`;
 
             {showThemeSelector && (
               <section class="mobile-menu-section">
-                <p class="mobile-menu-label">Theme</p>
+
+                <p class="mobile-menu-label">{t('nav.theme', locale)}</p>
                 <div
                   class="mobile-menu-stagger flex items-center justify-between rounded-xl px-3 py-2.5"
                   style={`--stagger-index: ${navItems.length}`}
                 >
-                  <span class="text-sm text-foreground-muted">Colour theme</span>
+                  <span class="text-sm text-foreground-muted">{t('nav.colourTheme', locale)}</span>
                   <ThemeSelector />
                 </div>
               </section>
@@ -451,12 +441,11 @@ const buttonId = `${menuId}-button`;
 
             {showLanguageSwitcher && (
               <section class="mobile-menu-section">
-                <p class="mobile-menu-label">Language</p>
                 <div
                   class="mobile-menu-stagger flex items-center justify-between rounded-xl px-3 py-2.5"
                   style={`--stagger-index: ${navItems.length + (showThemeSelector ? 1 : 0)}`}
                 >
-                  <span class="text-sm text-foreground-muted">Language</span>
+                  <span class="text-sm text-foreground-muted">{t('nav.language', locale)}</span>
                   <LanguageSwitcher />
                 </div>
               </section>
@@ -464,17 +453,20 @@ const buttonId = `${menuId}-button`;
 
             {mobileSocialLinks.length > 0 && (
               <section class="mobile-menu-section">
-                <p class="mobile-menu-label">Connect</p>
+                <p class="mobile-menu-label">{t('nav.connect', locale)}</p>
                 <div class="flex flex-wrap items-center gap-2 px-2 pt-1 pb-2">
                   {mobileSocialLinks.map((url, sIdx) => {
-                    const { icon, label } = getSocialIconData(url);
+
+                    const { icon, labelKey } = getSocialIconData(url);
                     return (
                       <a
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        aria-label={label}
-                        title={label}
+
+
+                        aria-label={t(labelKey, locale)}
+                        title={t(labelKey, locale)}
                         class="mobile-menu-social mobile-menu-stagger inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-strong text-foreground-muted transition-colors"
                         style={`--stagger-index: ${navItems.length + (showThemeSelector ? 1 : 0) + (showLanguageSwitcher ? 1 : 0) + sIdx}`}
                       >
@@ -493,7 +485,7 @@ const buttonId = `${menuId}-button`;
               >
                 <Button fullWidth href={ctaHref} target={ctaHref?.startsWith('http') ? '_blank' : undefined}>
                   {cta.icon && <Icon name={cta.icon} size="sm" />}
-                  {cta.label}
+                  {t(cta.label || 'nav.startProject', locale)}
                   {cta.trailingIcon && <Icon name={cta.trailingIcon} size="sm" />}
                 </Button>
               </div>
@@ -640,12 +632,12 @@ const buttonId = `${menuId}-button`;
 </script>
 
 <script>
-  // Header scroll behaviour + scroll-progress bar driven by a single rAF.
-  // All layout reads are taken before any DOM writes. `docMaxScrollY` is
-  // cached; the first read is deferred to a rAF so it runs AFTER first
-  // paint instead of forcing a synchronous layout before it. ResizeObserver
-  // handles subsequent changes (font swap, image loads, reveal animations)
-  // without re-introducing a critical-path reflow.
+  // Header scroll behaviour (scroll-progress bar is driven independently from
+  // BaseLayout). All layout reads are taken before any DOM writes.
+  // `docMaxScrollY` is cached; the first read is deferred to a rAF so it runs
+  // AFTER first paint instead of forcing a synchronous layout before it.
+  // ResizeObserver handles subsequent changes (font swap, image loads, reveal
+  // animations) without re-introducing a critical-path reflow.
   const SCROLL_THRESHOLD = 60;
   const AUTO_HIDE_THRESHOLD = 150;
   const BAR_SCROLLED_CLASSES = ['bg-background/80', 'backdrop-blur-lg', 'border-b', 'border-border/50'];
@@ -670,7 +662,6 @@ const buttonId = `${menuId}-button`;
     const scrollHeaders = document.querySelectorAll<HTMLElement>(
       'header[data-header-shape="floating"], header[data-header-shape="bar"]'
     );
-    const progressBar = document.getElementById('scroll-progress-bar');
 
     scrollHeaders.forEach((header) => {
       if (header.dataset.scrollInit) return;
@@ -738,13 +729,6 @@ const buttonId = `${menuId}-button`;
             }
           }
 
-          // Drive the scroll-progress bar in the same frame, using the
-          // already-read currentScrollY and the cached docMaxScrollY.
-          if (progressBar) {
-            const pct = docMaxScrollY > 0 ? (currentScrollY / docMaxScrollY) * 100 : 0;
-            progressBar.style.width = `${pct}%`;
-          }
-
           lastScrollY = currentScrollY;
           ticking = false;
         });
@@ -758,32 +742,6 @@ const buttonId = `${menuId}-button`;
         onScroll();
       });
     });
-
-    // Edge case: a progress bar exists without a header scroll-watcher.
-    // Drive it with its own minimal rAF so the bar still updates.
-    if (progressBar && scrollHeaders.length === 0 && !progressBar.dataset.progressInit) {
-      progressBar.dataset.progressInit = 'true';
-      let pTicking = false;
-      const updateProgress = () => {
-        const pct = docMaxScrollY > 0 ? (window.scrollY / docMaxScrollY) * 100 : 0;
-        progressBar.style.width = `${pct}%`;
-        pTicking = false;
-      };
-      window.addEventListener(
-        'scroll',
-        () => {
-          if (!pTicking) {
-            pTicking = true;
-            requestAnimationFrame(updateProgress);
-          }
-        },
-        { passive: true },
-      );
-      requestAnimationFrame(() => {
-        updateDocMaxScrollY();
-        updateProgress();
-      });
-    }
   }
 
   initScrollDriven();
@@ -933,12 +891,16 @@ const buttonId = `${menuId}-button`;
   }
 
   html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .ttg-wrapper > .ttg-trigger,
+  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .lang-wrapper .ttg-trigger,
+  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .pagefind-search-btn,
   html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .theme-dropdown-wrapper > button {
     border-color: oklch(58% 0.008 250 / 0.6);
     color: oklch(68% 0.01 250);
     box-shadow: none;
   }
   html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .ttg-wrapper > .ttg-trigger:hover,
+  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .lang-wrapper .ttg-trigger:hover,
+  html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .pagefind-search-btn:hover,
   html:not(.dark) [data-header-shape="floating"]:not([data-scrolled]) .theme-dropdown-wrapper > button:hover {
     border-color: oklch(58% 0.008 250 / 0.85);
     background-color: rgb(255 255 255 / 0.06);
@@ -956,7 +918,9 @@ const buttonId = `${menuId}-button`;
   }
 
   .dark [data-header-shape="floating"] .theme-dropdown-wrapper button,
-  .dark [data-header-shape="floating"] .ttg-wrapper .ttg-trigger {
+  .dark [data-header-shape="floating"] .ttg-wrapper .ttg-trigger,
+  .dark [data-header-shape="floating"] .lang-wrapper .ttg-trigger,
+  .dark [data-header-shape="floating"] .pagefind-search-btn {
     border-color: var(--color-foreground-subtle);
   }
 
@@ -1012,7 +976,9 @@ const buttonId = `${menuId}-button`;
     color: var(--color-brand-700);
   }
   .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper button,
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger {
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger,
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .lang-wrapper .ttg-trigger,
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .pagefind-search-btn {
     border-color: rgba(0, 0, 0, 0.15);
   }
 
@@ -1033,21 +999,27 @@ const buttonId = `${menuId}-button`;
     color: var(--color-brand-500);
   }
   html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper button,
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger {
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .ttg-wrapper .ttg-trigger,
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .lang-wrapper .ttg-trigger,
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .pagefind-search-btn {
     border-color: rgba(255, 255, 255, 0.2);
   }
 
   /* ===== Returned state: fix button hover backgrounds ===== */
   /* Dark mode: white header needs light hover, not dark-mode secondary */
   .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] button.hdr-invert-text:hover,
-  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover {
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover,
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .lang-wrapper .ttg-trigger:hover,
+  .dark [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .pagefind-search-btn:hover {
     background-color: rgba(0, 0, 0, 0.08);
     color: oklch(8% 0 0);
   }
 
   /* Light mode: dark header needs dark hover, not light-mode secondary */
   html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] button.hdr-invert-text:hover,
-  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover {
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .theme-dropdown-wrapper > button:hover,
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .lang-wrapper .ttg-trigger:hover,
+  html:not(.dark) [data-header-shape="floating"][data-header-returned][data-header-invert-on-return="true"] .pagefind-search-btn:hover {
     background-color: rgba(255, 255, 255, 0.12);
     color: rgba(255, 255, 255, 1);
   }

@@ -1,5 +1,6 @@
 import en from './en.json';
-import nl from './nl.json';
+import ru from './ru.json';
+
 import i18nConfig from '../config/i18n.config';
 
 export { i18nConfig };
@@ -11,7 +12,7 @@ export type Dictionary = typeof en;
 
 const dictionaries: Record<string, Dictionary> = {
   en: en as Dictionary,
-  nl: nl as Dictionary,
+  ru: ru as Dictionary,
 };
 
 export const defaultLocale: Locale = i18nConfig.defaultLocale;
@@ -38,6 +39,8 @@ export function resolveLocale(locale: string | undefined): Locale {
 }
 
 function getNested(dict: Dictionary, key: string): string | undefined {
+  // Safety: guard against undefined/null dict or key
+  if (!dict || !key) return undefined;
   const parts = key.split('.');
   let value: unknown = dict;
   for (const part of parts) {
@@ -64,7 +67,11 @@ function interpolate(template: string, vars?: Record<string, string | number>): 
  * non-fatal. Supports `{name}` placeholders via `vars`.
  */
 export function t(key: string, locale: Locale = defaultLocale, vars?: Record<string, string | number>): string {
-  const dict = dictionaries[locale] ?? dictionaries[defaultLocale];
+
+
+
+  const safeLocale = isValidLocale(locale) ? locale : defaultLocale;
+  const dict = dictionaries[safeLocale];
   const fallback = dictionaries[defaultLocale];
   const value = (dict && getNested(dict, key)) ?? (fallback && getNested(fallback, key)) ?? key;
   return interpolate(value, vars);
@@ -111,11 +118,21 @@ export function swapLocaleInPath(path: string, targetLocale: Locale): string {
 }
 
 /**
- * Detect the active locale from a path's first segment. Returns the
- * default locale if no recognized locale prefix is present.
+ * Detect the active locale from a path. Checks all path segments for a
+ * recognized locale prefix (e.g. `/ru/` anywhere in the path).
+ * Returns the default locale if no recognized locale is found.
+ *
+ * This is needed because blog posts use paths like `/blog/ru/slug`
+ * (not `/ru/blog/slug`), so checking only the first segment would miss
+ * the locale.
  */
 export function getLocaleFromPath(path: string): Locale {
   const normalized = path.startsWith('/') ? path : `/${path}`;
-  const first = normalized.split('/').filter(Boolean)[0];
-  return first && i18nConfig.locales.includes(first) ? first : defaultLocale;
+  const segments = normalized.split('/').filter(Boolean);
+  for (const segment of segments) {
+    if (i18nConfig.locales.includes(segment)) {
+      return segment;
+    }
+  }
+  return defaultLocale;
 }

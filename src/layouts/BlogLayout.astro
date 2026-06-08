@@ -17,7 +17,7 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
 import { resolveSocialLinks } from '@/lib/utils';
 import { createBlogPostSchema, createFAQSchema } from '@/lib/schema';
 import { getBlogOgPath } from '@/lib/og';
-import { getLocaleFromPath } from '@/i18n';
+import { getLocaleFromPath, localizedPath, t } from '@/i18n';
 
 const locale = getLocaleFromPath(Astro.url.pathname);
 
@@ -87,8 +87,9 @@ const sidebarOnLeft = (tocConfig?.sidebarPosition ?? 'right') === 'left';
 const ogImage = image?.src || (slug ? getBlogOgPath(slug.replace(/^en\//, '')) : siteConfig.ogImage);
 
 const breadcrumbs = [
-  { label: 'Home', href: '/' },
-  { label: 'Blog', href: '/blog' },
+
+  { label: '', href: localizedPath('/', locale), icon: 'home' },
+  { label: t('blog.title', locale), href: localizedPath('/blog', locale) },
   { label: title },
 ];
 
@@ -129,7 +130,6 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
     variant="solid"
     size="lg"
     showCta={false}
-    showScrollProgress
     maxWidth="7xl"
   />
 
@@ -160,14 +160,17 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
             headings={headings}
             maxDepth={tocConfig?.maxDepth ?? 3}
             minHeadings={tocConfig?.minHeadings ?? 3}
+            title={t('blog.tableOfContents', locale)}
             sticky
           />
         </aside>
       )}
 
-      <div class:list={['min-w-0 max-w-4xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
+      <div class:list={['min-w-0 max-w-5xl w-full mx-auto', sidebarActive && 'xl:mx-0']}>
       <!-- Breadcrumbs -->
-      <Breadcrumbs items={breadcrumbs} class="mb-8" />
+      <div class="sticky top-18 md:top-24 z-10 pb-2 mb-2 -mx-6 px-6 bg-background before:content-[''] before:absolute before:inset-x-0 before:bottom-full before:h-18 md:before:h-24 before:bg-background after:content-[''] after:absolute after:inset-x-0 after:top-full after:h-4 after:bg-gradient-to-b after:from-background after:to-transparent">
+        <Breadcrumbs items={breadcrumbs} />
+      </div>
 
       {inlineActive && (
         <div class="mb-10 rounded-xl border border-border bg-background-secondary p-5">
@@ -175,6 +178,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
             headings={headings}
             maxDepth={tocConfig?.maxDepth ?? 3}
             minHeadings={tocConfig?.minHeadings ?? 3}
+            title={t('blog.tableOfContents', locale)}
           />
         </div>
       )}
@@ -189,14 +193,14 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
 
       <!-- Share buttons (centered, above the divider) -->
       <div class="mt-12 flex justify-center" data-reveal>
-        <ShareButtons title={title} url={fullUrl} />
+        <ShareButtons title={title} url={fullUrl} locale={locale} />
       </div>
 
       <!-- Article Footer -->
       <footer class="border-border mt-12 border-t pt-8 flex justify-center" data-reveal>
-        <Button href="/blog" variant="secondary" size="sm">
+        <Button href={localizedPath('/blog', locale)} variant="secondary" size="sm">
           <Icon name="arrow-left" size="sm" />
-          Back to Blog
+          {t('common.backToBlog', locale)}
         </Button>
       </footer>
       </div>
@@ -207,6 +211,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
             headings={headings}
             maxDepth={tocConfig?.maxDepth ?? 3}
             minHeadings={tocConfig?.minHeadings ?? 3}
+            title={t('blog.tableOfContents', locale)}
             sticky
           />
         </aside>
@@ -228,8 +233,8 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
   <!-- Follow Along -->
   <!-- Mobile: standard CTA, no LetterGlitch -->
   <CTA variant="default" size="md" maxWidth="lg" glow={false} data-reveal class="glitch:hidden bg-background-secondary">
-    <h2 slot="heading" class="!text-4xl">Follow along</h2>
-    <p slot="description" class="!text-lg text-balance">Stay in the loop — new articles, thoughts, and updates.</p>
+    <h2 slot="heading" class="!text-4xl">{t('common.followAlong', locale)}</h2>
+    <p slot="description" class="!text-lg text-balance">{t('common.stayInLoop', locale)}</p>
 
     <div class="flex flex-wrap items-center justify-center gap-3">
       <a
@@ -237,7 +242,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
         class="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500 hover:text-brand-500"
       >
         <Icon name="rss" size="sm" />
-        RSS Feed
+        {t('common.rssFeed', locale)}
       </a>
       {socialLinks.map((link) => (
         <a
@@ -255,7 +260,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
         class="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-500 hover:text-brand-500"
       >
         <Icon name="mail" size="sm" />
-        Email
+        {t('common.email', locale)}
       </a>
     </div>
   </CTA>
@@ -263,8 +268,8 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
   <!-- Desktop: contained LetterGlitch band with glass card -->
   <section class="hidden glitch:block relative z-10 py-[var(--space-section-md)] bg-background-secondary">
     <LetterGlitchBand maxWidth="7xl">
-      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">Follow along</h2>
-      <p class="text-lg text-foreground-muted mb-8 text-balance">Stay in the loop — new articles, thoughts, and updates.</p>
+      <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">{t('common.followAlong', locale)}</h2>
+      <p class="text-lg text-foreground-muted mb-8 text-balance">{t('common.stayInLoop', locale)}</p>
 
       <div class="flex flex-wrap items-center justify-center gap-3">
         <a
@@ -272,7 +277,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
           class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
         >
           <Icon name="rss" size="sm" />
-          RSS Feed
+          {t('common.rssFeed', locale)}
         </a>
         {socialLinks.map((link) => (
           <a
@@ -290,7 +295,7 @@ const schemas = faqSchema ? [blogPostingSchema, faqSchema] : [blogPostingSchema]
           class="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/5 px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand-400 hover:bg-brand-500/20 hover:text-foreground"
         >
           <Icon name="mail" size="sm" />
-          Email
+          {t('common.email', locale)}
         </a>
       </div>
     </LetterGlitchBand>

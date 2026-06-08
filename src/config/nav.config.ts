@@ -15,6 +15,7 @@
 
 export interface NavItem {
   label: string;
+  labelKey?: string;
   href: string;
   order: number;
   external?: boolean;
@@ -26,19 +27,19 @@ export interface LegalLink {
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Services', href: '/services', order: 1 },
-  { label: 'Projects', href: '/projects', order: 2 },
-  { label: 'Blog', href: '/blog', order: 3 },
-  { label: 'About', href: '/about', order: 4 },
-  { label: 'Contact', href: '/contact', order: 5 },
+  { label: 'Services', labelKey: 'nav.sections.services', href: '/services', order: 1 },
+  { label: 'Projects', labelKey: 'nav.sections.projects', href: '/projects', order: 2 },
+  { label: 'Blog', labelKey: 'nav.sections.blog', href: '/blog', order: 3 },
+  { label: 'About', labelKey: 'nav.sections.about', href: '/about', order: 4 },
+  { label: 'Contact', labelKey: 'nav.sections.contact', href: '/contact', order: 5 },
 ];
 
 export const footerNavItems: NavItem[] = [
-  { label: 'Services', href: '/services', order: 1 },
-  { label: 'Projects', href: '/projects', order: 2 },
-  { label: 'Blog', href: '/blog', order: 3 },
-  { label: 'About', href: '/about', order: 4 },
-  { label: 'Contact', href: '/contact', order: 5 },
+  { label: 'Services', labelKey: 'nav.sections.services', href: '/services', order: 1 },
+  { label: 'Projects', labelKey: 'nav.sections.projects', href: '/projects', order: 2 },
+  { label: 'Blog', labelKey: 'nav.sections.blog', href: '/blog', order: 3 },
+  { label: 'About', labelKey: 'nav.sections.about', href: '/about', order: 4 },
+  { label: 'Contact', labelKey: 'nav.sections.contact', href: '/contact', order: 5 },
 ];
 
 export const legalLinks: LegalLink[] = [];

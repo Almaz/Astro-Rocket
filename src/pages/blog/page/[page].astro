@@ -2,7 +2,6 @@
 import PageLayout from '@/layouts/PageLayout.astro';
 import BlogCard from '@/components/blog/BlogCard.astro';
 import Pagination from '@/components/blog/Pagination.astro';
-import TagList from '@/components/blog/TagList.astro';
 import Badge from '@/components/ui/data-display/Badge/Badge.astro';
 import Icon from '@/components/ui/primitives/Icon/Icon.astro';
 import CTA from '@/components/ui/marketing/CTA/CTA.astro';
@@ -25,17 +24,16 @@ export async function getStaticPaths() {
   const regularPostsAll = nonFeatured.length > 0 ? nonFeatured : posts;
   const totalPages = Math.max(1, Math.ceil(regularPostsAll.length / BLOG_POSTS_PER_PAGE));
 
-  // Page 1 lives at /blog; only emit /blog/page/2..N from this route.
-  const pages: { params: { page: string }; props: { page: number; totalPages: number } }[] = [];
+  const allPaths = [];
   for (let page = 2; page <= totalPages; page++) {
-    pages.push({ params: { page: String(page) }, props: { page, totalPages } });
+    allPaths.push({ params: { page: String(page) }, props: { page, totalPages, locale: 'en' } });
   }
-  return pages;
+  return allPaths;
 }
 
-const { page, totalPages } = Astro.props;
+const { page, totalPages, locale } = Astro.props;
 
-const posts = await getPublishedPosts('en');
+const posts = await getPublishedPosts(locale);
 const nonFeatured = posts.filter((p) => !p.data.featured);
 const regularPostsAll = nonFeatured.length > 0 ? nonFeatured : posts;
 
@@ -77,7 +75,7 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
         </a>
 
         {topTags.length > 0 && (
-          <TagList tags={topTags} class="justify-center" />
+          {"text": "<TagList tags={topTags} class=\"justify-center\" locale={locale} />"}
         )}
       </div>
 
@@ -86,7 +84,7 @@ const socialLinks = resolveSocialLinks(siteConfig.socialLinks);
           <BlogCard
             title={post.data.title}
             description={post.data.description}
-            href={getPostUrl(post.id)}
+            href={getPostUrl(post.id, locale)}
             publishedAt={post.data.publishedAt}
             tags={post.data.tags}
             author={post.data.author}

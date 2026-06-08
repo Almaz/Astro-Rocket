@@ -13,6 +13,11 @@ interface LetterGlitchProps {
    * tokens can't be resolved.
    */
   useBrandTokens?: boolean;
+  /**
+   * Locale for character set selection.
+   * When 'ru', uses Cyrillic uppercase letters instead of Latin.
+   */
+  locale?: string;
 }
 
 const FALLBACK_COLORS = ['#5e4491', '#A476FF', '#241a38'];
@@ -25,6 +30,7 @@ const LetterGlitch = ({
   outerVignette = false,
   smooth = true,
   useBrandTokens = true,
+  locale = 'en',
 }: LetterGlitchProps) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animationRef = useRef<number | null>(null);
@@ -50,13 +56,26 @@ const LetterGlitch = ({
   const charWidth = 10;
   const charHeight = 20;
 
-  const lettersAndSymbols = [
+  const latinChars = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
     'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+  ];
+
+  const cyrillicChars = [
+    'А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ё', 'Ж', 'З', 'И', 'Й', 'К', 'Л',
+    'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У', 'Ф', 'Х', 'Ц', 'Ч', 'Ш',
+    'Щ', 'Ъ', 'Ы', 'Ь', 'Э', 'Ю', 'Я',
+  ];
+
+  const symbols = [
     '!', '@', '#', '$', '&', '*', '(', ')', '-', '_', '+', '=', '/',
     '[', ']', '{', '}', ';', ':', '<', '>', ',',
     '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   ];
+
+  const lettersAndSymbols = locale === 'ru'
+    ? [...cyrillicChars, ...symbols]
+    : [...latinChars, ...symbols];
 
   const getRandomChar = () => {
     return lettersAndSymbols[Math.floor(Math.random() * lettersAndSymbols.length)];
@@ -299,10 +318,18 @@ const LetterGlitch = ({
   }, [glitchSpeed, smooth, useBrandTokens]);
 
   return (
-    <div className="relative w-full h-full bg-[#101010] overflow-hidden">
+    <div
+      className="relative w-full h-full overflow-hidden"
+      style={{ backgroundColor: 'var(--background)' }}
+    >
       <canvas ref={canvasRef} className="block w-full h-full" />
       {outerVignette && (
-        <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(16,16,16,0)_60%,_rgba(16,16,16,1)_100%)]"></div>
+        <div
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{
+            background: `radial-gradient(circle, color-mix(in srgb, var(--background) 0%, transparent) 60%, var(--background) 100%)`,
+          }}
+        ></div>
       )}
       {centerVignette && (
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none bg-[radial-gradient(circle,_rgba(0,0,0,0.8)_0%,_rgba(0,0,0,0)_60%)]"></div>

@@ -343,10 +343,12 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
           <p class="text-lg text-foreground-muted leading-relaxed text-pretty sm:max-w-xl sm:mx-auto glitch:max-w-none glitch:mx-0">
             Astro Rocket is free, open source, and MIT licensed. Browse the source, open issues, submit PRs, or just clone it and build something great.
           </p>
-          <Button variant="outline" size="lg" href="https://github.com/hansmartensdev/astro-rocket" target="_blank" rel="noopener noreferrer" class="self-start sm:self-center glitch:self-start mt-2">
-            View on GitHub
-            <Icon name="arrow-right" size="sm" />
-          </Button>
+          <div class="flex flex-wrap gap-3 self-start sm:self-center glitch:self-start mt-2">
+            <Button variant="outline" size="lg" href="https://github.com/hansmartensdev/astro-rocket" target="_blank" rel="noopener noreferrer">
+              View on GitHub
+              <Icon name="arrow-right" size="sm" />
+            </Button>
+          </div>
         </div>
 
         <!-- Info card -->
@@ -394,7 +396,7 @@ import LetterGlitchBand from '@/components/patterns/LetterGlitchBand.astro';
     </div>
 
     <!-- Desktop: contained LetterGlitch band with glass card -->
-    <LetterGlitchBand>
+    <LetterGlitchBand locale="en">
       <h2 class="font-display text-4xl font-bold text-foreground mb-4 text-balance">
         Ready to build?
       </h2>

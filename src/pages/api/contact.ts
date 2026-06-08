@@ -5,6 +5,36 @@ import { z } from 'astro/zod';
 import { Resend } from 'resend';
 import siteConfig from '@/config/site.config';
 
+type Locale = 'en' | 'ru';
+
+const localeMessages: Record<string, Record<string, string>> = {
+  en: {
+    'Name must be at least 2 characters': 'Name must be at least 2 characters',
+    'Please enter a valid email address': 'Please enter a valid email address',
+    'Message must be at least 10 characters': 'Message must be at least 10 characters',
+    'Email service is not configured': 'Email service is not configured',
+    'Failed to send email': 'Failed to send email',
+    'An unexpected error occurred': 'An unexpected error occurred',
+  },
+  ru: {
+    'Name must be at least 2 characters': 'Имя должно содержать минимум 2 символа.',
+    'Please enter a valid email address': 'Пожалуйста, введите корректный email-адрес.',
+    'Message must be at least 10 characters': 'Сообщение должно содержать минимум 10 символов.',
+    'Email service is not configured': 'Сервис электронной почты не настроен!',
+    'Failed to send email': 'Не удалось отправить письмо.',
+    'An unexpected error occurred': 'Произошла неожиданная ошибка!',
+  },
+};
+
+function t(key: string, locale: Locale): string {
+  return localeMessages[locale]?.[key] || localeMessages.en?.[key] || key;
+}
+
+function getLocale(formData: FormData): Locale {
+  const raw = formData.get('locale')?.toString();
+  return raw === 'ru' ? 'ru' : 'en';
+}
+
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters').max(100),
   email: z.email('Please enter a valid email address'),
@@ -35,7 +65,9 @@ export const POST: APIRoute = async ({ request }) => {
         if (!fieldErrors[field]) {
           fieldErrors[field] = [];
         }
-        fieldErrors[field].push(error.message);
+
+
+        fieldErrors[field].push(t(error.message, getLocale(formData)));
       }
 
       return new Response(
@@ -57,7 +89,8 @@ export const POST: APIRoute = async ({ request }) => {
     if (!apiKey) {
       console.error('RESEND_API_KEY is not set');
       return new Response(
-        JSON.stringify({ success: false, errors: { form: ['Email service is not configured'] } }),
+
+        JSON.stringify({ success: false, errors: { form: [t('Email service is not configured', getLocale(formData))] } }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -87,8 +120,9 @@ export const POST: APIRoute = async ({ request }) => {
 
     if (error) {
       console.error('Resend error:', error);
+
       return new Response(
-        JSON.stringify({ success: false, errors: { form: [error.message || 'Failed to send email'] } }),
+        JSON.stringify({ success: false, errors: { form: [t(error.message || 'Failed to send email', getLocale(formData))] } }),
         { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
@@ -101,7 +135,7 @@ export const POST: APIRoute = async ({ request }) => {
     console.error('Contact form error:', error);
 
     return new Response(
-      JSON.stringify({ success: false, errors: { form: ['An unexpected error occurred'] } }),
+      JSON.stringify({ success: false, errors: { form: [t('An unexpected error occurred', 'en')] } }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }

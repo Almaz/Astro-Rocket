@@ -9,8 +9,7 @@
  * Renders nothing when i18n is disabled or only one locale is
  * configured, so it has zero cost on single-locale sites.
  *
- * Pure HTML <a> links — no JS framework, no client-side routing.
- * The only script is for opening/closing the dropdown panel.
+ * Styled identically to ThemeModeDropdown (ttg-wrapper / ttg-trigger / ttg-row).
  */
 import { cn } from '@/lib/cn';
 import {
@@ -42,10 +41,11 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
 {
   enabled && (
     <div class={cn('relative lang-wrapper', className)}>
+      <!-- Trigger pill (identical to ttg-trigger) -->
       <button
         type="button"
         class={cn(
-          'lang-trigger inline-flex items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-1.5',
+          'ttg-trigger inline-flex items-center gap-1.5 rounded-full border border-border-strong px-2.5 py-1.5',
           'text-foreground-muted hover:text-foreground hover:bg-secondary',
           'transition-colors duration-(--transition-fast)',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
@@ -54,6 +54,7 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
         aria-expanded="false"
         aria-label={`${currentLanguageLabel}: ${getLocaleName(currentLocale)}. ${triggerLabel}.`}
       >
+        <!-- Globe icon -->
         <svg
           class="h-4 w-4"
           xmlns="http://www.w3.org/2000/svg"
@@ -69,6 +70,7 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
         {!compact && (
           <span class="text-xs font-semibold uppercase tracking-wide">{currentLocale}</span>
         )}
+        <!-- Chevron (identical to ttg-chevron) -->
         <svg
           class="lang-chevron h-3 w-3 flex-shrink-0 transition-transform duration-200"
           xmlns="http://www.w3.org/2000/svg"
@@ -84,10 +86,11 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
         </svg>
       </button>
 
+      <!-- Dropdown panel (identical to ttg-panel) -->
       <div
         class={cn(
           'lang-panel absolute right-0 top-full mt-2 z-50',
-          'w-48 rounded-xl border border-border bg-background shadow-lg',
+          'w-56 rounded-xl border border-border bg-background shadow-lg',
           'p-1.5 hidden'
         )}
         role="menu"
@@ -101,15 +104,19 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
               href={href}
               hreflang={locale}
               lang={locale}
-              class="lang-row"
+              class="ttg-row"
               role="menuitemradio"
               aria-checked={isActive ? 'true' : 'false'}
               data-locale={locale}
             >
-              <span class="lang-row-code">{locale.toUpperCase()}</span>
-              <span class="lang-row-name">{getLocaleName(locale)}</span>
+              <span class="ttg-row-icon text-xs font-semibold tracking-wide min-w-[1.75rem] text-center">
+                {locale.toUpperCase()}
+              </span>
+              <span class="ttg-row-label">
+                <span class="ttg-row-title">{getLocaleName(locale)}</span>
+              </span>
               <svg
-                class="lang-check h-4 w-4"
+                class="ttg-check h-4 w-4"
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
                 fill="none"
@@ -130,7 +137,8 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
 }
 
 <style>
-  .lang-row {
+  /* Use ttg-row styles from ThemeModeDropdown — identical appearance */
+  .lang-wrapper .ttg-row {
     display: grid;
     grid-template-columns: auto 1fr auto;
     align-items: center;
@@ -147,52 +155,46 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
       color var(--transition-fast);
   }
 
-  .lang-row:hover {
+  .lang-wrapper .ttg-row:hover {
     background-color: var(--color-secondary);
     color: var(--color-foreground);
   }
 
-  .lang-row:focus-visible {
+  .lang-wrapper .ttg-row:focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: -2px;
   }
 
-  .lang-row[aria-checked='true'] {
+  .lang-wrapper .ttg-row[aria-checked='true'] {
     background-color: var(--color-secondary);
     color: var(--color-foreground);
   }
 
-  .lang-row-code {
-    font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--color-foreground-subtle);
-    min-width: 1.75rem;
+  .lang-wrapper .ttg-row[aria-checked='true'] .ttg-check {
+    display: block;
   }
 
-  .lang-row[aria-checked='true'] .lang-row-code {
-    color: var(--color-brand-500);
-  }
-
-  .lang-row-name {
-    font-size: 0.875rem;
-    font-weight: 500;
-  }
-
-  .lang-check {
+  .lang-wrapper .ttg-check {
     display: none;
     color: var(--color-brand-500);
   }
 
-  .lang-row[aria-checked='true'] .lang-check {
-    display: block;
+  .lang-wrapper .ttg-row-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-foreground-subtle);
+  }
+
+  .lang-wrapper .ttg-row[aria-checked='true'] .ttg-row-icon {
+    color: var(--color-brand-500);
   }
 </style>
 
 <script>
   function closeAllLangPanels(): void {
     document.querySelectorAll<HTMLElement>('.lang-panel').forEach((p) => p.classList.add('hidden'));
-    document.querySelectorAll<HTMLButtonElement>('.lang-trigger').forEach((t) => {
+    document.querySelectorAll<HTMLButtonElement>('.lang-wrapper .ttg-trigger').forEach((t) => {
       t.setAttribute('aria-expanded', 'false');
       t.querySelector('.lang-chevron')?.classList.remove('rotate-180');
     });
@@ -206,14 +208,29 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
       if (wrapper.dataset.langInit) return;
       wrapper.dataset.langInit = 'true';
 
-      const trigger = wrapper.querySelector<HTMLButtonElement>('.lang-trigger');
+      const trigger = wrapper.querySelector<HTMLButtonElement>('.ttg-trigger');
       const panel = wrapper.querySelector<HTMLElement>('.lang-panel');
       if (!trigger || !panel) return;
 
       trigger.addEventListener('click', (e) => {
         e.stopPropagation();
         const willOpen = panel.classList.contains('hidden');
+        // Close other open panels (theme mode + colour theme)
         closeAllLangPanels();
+        document.querySelectorAll<HTMLElement>('.ttg-panel').forEach((p) => p.classList.add('hidden'));
+        document.querySelectorAll<HTMLButtonElement>('.ttg-trigger').forEach((t) => {
+          if (t !== trigger) {
+            t.setAttribute('aria-expanded', 'false');
+            t.querySelector('.ttg-chevron')?.classList.remove('rotate-180');
+          }
+        });
+        document.getElementById('theme-dropdown-panel')?.classList.add('hidden');
+        const themeTrigger = document.getElementById('theme-dropdown-trigger');
+        if (themeTrigger) {
+          themeTrigger.setAttribute('aria-expanded', 'false');
+          themeTrigger.querySelector('.theme-chevron')?.classList.remove('rotate-180');
+        }
+
         if (willOpen) {
           panel.classList.remove('hidden');
           trigger.setAttribute('aria-expanded', 'true');
@@ -233,7 +250,9 @@ const currentLanguageLabel = t('nav.currentLanguage', currentLocale);
       });
 
       document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeAllLangPanels();
+        if (e.key === 'Escape') {
+          closeAllLangPanels();
+        }
       });
     }
   }

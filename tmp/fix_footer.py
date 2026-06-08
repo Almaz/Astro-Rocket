@@ -1,0 +1,1 @@
+import os os.chdir('/home/almaz/StatSites/Astro/fastry') with open('src/components/layout/Footer.astro', 'r') as f: c = f.read() c = c.replace('{item.label}', '{t(item.labelKey, locale)}') with open('src/components/layout/Footer.astro', 'w') as f: f.write(c) print('Done')

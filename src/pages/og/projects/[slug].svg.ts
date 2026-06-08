@@ -6,7 +6,9 @@ export const getStaticPaths: GetStaticPaths = async () => {
   const projects = await getCollection('projects', ({ data }) => {
     return import.meta.env.PROD ? data.draft !== true : true;
   });
-  return projects.map((project) => ({
+  return projects
+    .filter((project) => !project.id.startsWith('ru/'))
+    .map((project) => ({
     params: { slug: project.id.replace(/\.mdx?$/, '') },
     props: {
       title: project.data.title,

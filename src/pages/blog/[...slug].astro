@@ -15,7 +15,13 @@ export async function getStaticPaths() {
     return data.locale === 'en' && (import.meta.env.PROD ? data.draft !== true : true);
   });
 
-  return posts.map((post) => ({
+  return posts
+    .filter((post) => {
+      // Skip paths that start with "tag/" — they are handled by [tag].astro
+      const slug = post.id.replace('en/', '');
+      return !slug.startsWith('tag/');
+    })
+    .map((post) => ({
     params: { slug: post.id.replace('en/', '') },
     props: { post },
   }));
